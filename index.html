@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Uni Stock</title>
+    <title>Uni Stock Pro - Full System</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Mitr:wght@300;400;600&display=swap" rel="stylesheet">
@@ -19,21 +19,26 @@
         .main-layout { display: block; }
         @media(min-width: 950px) { 
             body { padding: 30px; }
-            .main-layout { display: grid; grid-template-columns: 380px 1fr; gap: 25px; }
+            .main-layout { display: grid; grid-template-columns: 420px 1fr; gap: 25px; }
         }
 
         .card { background: white; padding: 20px; border-radius: 24px; box-shadow: 0 8px 24px rgba(164, 176, 190, 0.12); border: 2px solid #f1f2f6; height: fit-content; margin-bottom: 25px; }
         .card h3 { margin-top: 0; color: #2c3e50; border-bottom: 3px dashed #ffeaa7; padding-bottom: 10px; font-size: 18px; }
 
-        input, select { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 14px; border: 2px solid #f1f2f6; box-sizing: border-box; background: #fafafa; font-size: 14px; font-family: 'Mitr', sans-serif; }
+        input, select { width: 100%; padding: 11px; margin-bottom: 12px; border-radius: 12px; border: 2px solid #f1f2f6; box-sizing: border-box; background: #fafafa; font-size: 14px; font-family: 'Mitr', sans-serif; }
         input:focus, select:focus { border-color: #a29bfe; outline: none; background: white; }
         
-        .category-group { background: #fcfcfc; padding: 15px; border-radius: 16px; border: 2px dashed #dcdde1; margin-bottom: 15px; }
-        .category-title { font-size: 13px; font-weight: bold; color: #6c5ce7; display: block; margin-bottom: 5px; }
+        .variant-block { background: #fcf8ff; border: 2px solid #efebd6; padding: 12px; border-radius: 16px; margin-bottom: 10px; position: relative; }
+        .variant-block h4 { margin: 0 0 8px 0; font-size: 13px; color: #6c5ce7; }
+        .btn-remove-variant { position: absolute; top: 8px; right: 8px; background: none; border: none; color: #ff7675; cursor: pointer; font-size: 12px; font-weight: bold; }
+
+        .category-group { background: #fcfcfc; padding: 12px; border-radius: 14px; border: 2px dashed #dcdde1; margin-bottom: 12px; }
+        .category-title { font-size: 12px; font-weight: bold; color: #6c5ce7; display: block; margin-bottom: 4px; }
 
         .btn-submit { width: 100%; background: #6c5ce7; color: white; border: none; padding: 14px; border-radius: 14px; font-weight: bold; font-size: 16px; cursor: pointer; font-family: 'Mitr', sans-serif; box-shadow: 0 4px 12px rgba(108, 92, 231, 0.25); }
-        .btn-scan { background: #00cec9; color: white; margin-bottom: 15px; }
-        
+        .btn-add-variant { background: #fff2cc; color: #d97706; border: 2px solid #f59e0b; padding: 10px; border-radius: 12px; font-weight: bold; margin-bottom: 15px; width: 100%; cursor: pointer; font-family: 'Mitr', sans-serif; }
+        .btn-scan-item { background: #00cec9; color: white; padding: 6px 10px; border-radius: 8px; font-size: 11px; border: none; cursor: pointer; margin-bottom: 6px; display: inline-block; font-family: 'Mitr', sans-serif; }
+
         .table-wrapper { overflow-x: auto; background: white; border-radius: 24px; padding: 15px; box-shadow: 0 8px 24px rgba(164, 176, 190, 0.12); border: 2px solid #f1f2f6; }
         table { width: 100%; border-collapse: collapse; min-width: 850px; }
         th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid #f1f2f6; font-size: 14px; }
@@ -41,15 +46,15 @@
 
         .product-img { width: 55px; height: 55px; border-radius: 14px; object-fit: cover; }
         .badge-sku { font-family: 'Chakra Petch', sans-serif; background: #f1f2f6; padding: 3px 6px; border-radius: 8px; font-weight: bold; }
-        .badge-variant { background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 6px; font-size: 11px; margin-right: 3px; display: inline-block; font-weight: bold; }
+        .badge-variant { background: #f3e8ff; color: #7c3aed; padding: 2px 6px; border-radius: 6px; font-size: 11px; margin-right: 3px; display: inline-block; font-weight: bold; }
         
         .btn-action { border: none; padding: 6px 10px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; margin-right: 2px; font-family: 'Mitr', sans-serif; }
         .btn-in { background: #e8fbf1; color: #10b981; }
         .btn-out { background: #fef2f2; color: #ef4444; }
-        .btn-edit { background: #e0e7ff; color: #4f46e5; }
+        .btn-del { background: #ffeae8; color: #eb4d4b; } /* 🟥 ปุ่มลบสินค้า */
 
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; padding: 15px; box-sizing: border-box; }
-        .receipt-box { background: white; width: 100%; max-width: 380px; border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); font-family: 'Chakra Petch', 'Mitr', sans-serif; text-align: center; border-top: 8px solid #6c5ce7; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
+        .receipt-box { background: white; width: 100%; max-width: 380px; border-radius: 20px; padding: 25px; text-align: center; border-top: 8px solid #6c5ce7; font-family: 'Chakra Petch', 'Mitr', sans-serif; }
         .receipt-dash { border-top: 2px dashed #ccc; margin: 15px 0; }
     </style>
 </head>
@@ -59,7 +64,7 @@
         <div class="header-area">
             <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='50' fill='%236c5ce7'/><circle cx='50' cy='52' r='26' fill='white'/><circle cx='38' cy='32' r='10' fill='white'/><circle cx='62' cy='32' r='10' fill='white'/><circle cx='38' cy='32' r='5' fill='%23ffb8b8'/><circle cx='62' cy='32' r='5' fill='%23ffb8b8'/><circle cx='44' cy='48' r='3' fill='%234a4a4a'/><circle cx='56' cy='48' r='3' fill='%234a4a4a'/><path d='M46 56 Q50 59 54 56' stroke='%234a4a4a' stroke-width='2.5' fill='none' stroke-linecap='round'/><rect x='36' y='64' width='28' height='20' rx='4' fill='%23ffeaa7'/><path d='M36 68 L50 76 L64 68' stroke='%23e67e22' stroke-width='1.5' fill='none'/></svg>" class="brand-logo" alt="Uni Stock Logo">
             <h1>Uni Stock Pro 🚀</h1>
-            <p style="color:#a4b0be; font-size:13px; margin:0;">ระบบคลังสินค้าอัจฉริยะสำหรับคุณฟิล์ม ✨</p>
+            <p style="color:#a4b0be; font-size:13px; margin:0;">ระบบคลังสินค้า เพิ่มสินค้าหลัก แตกสีย่อย + ปุ่มลบสินค้า ครบวงจร</p>
         </div>
 
         <div id="scanner-container" class="card" style="display: none; max-width: 500px; margin: 0 auto 20px auto;">
@@ -70,51 +75,49 @@
 
         <div class="main-layout">
             <div class="card">
-                <h3 id="formTitle">✨ เพิ่มสินค้าใหม่</h3>
-                <button onclick="startScanner('add')" class="btn-submit btn-scan">📷 ยิงบาร์โค้ดแทนการพิมพ์</button>
-                
+                <h3>✨ บันทึกสินค้าลงคลัง</h3>
                 <form id="productForm">
-                    <input type="hidden" id="editingId">
-                    <input type="text" id="sku" placeholder="รหัส SKU / บาร์โค้ดสินค้า" required>
-                    <input type="text" id="name" placeholder="ชื่อสินค้า (เช่น ซองใส่การ์ด, ปลอกคอ)" required>
-                    <input type="text" id="variant" placeholder="🎨 สี / ลายย่อย (เช่น ชมพู, ฟ้า, ลายหมี)" required>
+                    <input type="text" id="name" placeholder="ชื่อสินค้าหลัก (เช่น ซองใส่การ์ด)" required>
                     
                     <div class="category-group">
-                        <span class="category-title">📁 เลือกจากหมวดหมู่เดิมที่มี:</span>
+                        <span class="category-title">📁 หมวดหมู่เดิมที่มี:</span>
                         <select id="categorySelect" onchange="syncCategorySelect()">
                             <option value="">-- เลื่อนเลือกหมวดหมู่ --</option>
                         </select>
-                        <span class="category-title" style="margin-top: 8px;">✏️ หรือเพิ่มหมวดหมู่ใหม่:</span>
+                        <span class="category-title" style="margin-top: 6px;">✏️ หรือเพิ่มหมวดหมู่ใหม่:</span>
                         <input type="text" id="categoryInput" placeholder="พิมพ์หมวดหมู่ใหม่ที่นี่..." style="margin-bottom:0;">
                     </div>
 
-                    <input type="number" id="price" placeholder="ราคาสินค้า (บาท)" required value="0">
-                    <input type="number" id="qty" placeholder="จำนวนสต๊อก" required>
-                    
-                    <label style="font-size: 12px; font-weight: bold; color: #747d8c; display: block; margin-bottom: 6px;">📸 รูปภาพสินค้า :</label>
+                    <label style="font-size: 12px; font-weight: bold; color: #747d8c; display: block; margin-bottom: 6px;">📸 รูปภาพสินค้าหลัก :</label>
                     <input type="file" id="imageFile" accept="image/*">
                     
-                    <button type="submit" id="submitBtn" class="btn-submit">💾 บันทึกสินค้าลงคลัง</button>
-                    <button type="button" id="cancelEditBtn" class="btn-submit" style="background:#b2bec3; margin-top:8px; display:none;" onclick="resetForm()">❌ ยกเลิกการแก้ไข</button>
+                    <div class="receipt-dash"></div>
+                    <h3 style="font-size: 15px; color: #6c5ce7; margin-bottom: 10px;">🎨 สี / ลายย่อยที่มีในชิ้นนี้</h3>
+                    
+                    <div id="variantsContainer"></div>
+
+                    <button type="button" class="btn-add-variant" onclick="addVariantBlock()">➕ คลิกเพิ่ม สี / ตัวเลือกลายย่อย</button>
+                    
+                    <button type="submit" class="btn-submit">💾 บันทึกสินค้าและสีย่อยทั้งหมด</button>
                 </form>
             </div>
 
             <div>
                 <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-bottom: 20px;">
-                    <input type="text" id="searchInput" style="margin-bottom:0;" placeholder="🔍 พิมพ์หรือยิงบาร์โค้ดเพื่อค้นหาหรือตัดขาย..." onkeyup="filterProducts()">
-                    <button onclick="startScanner('sell')" class="btn-submit btn-scan" style="margin-bottom:0; padding:0 20px;">📷 สแกนขาย</button>
+                    <input type="text" id="searchInput" style="margin-bottom:0;" placeholder="🔍 พิมพ์หรือยิงบาร์โค้ดเพื่อค้นหาหรือตัดขายออก..." onkeyup="filterProducts()">
+                    <button onclick="startScanner(null, 'sell')" class="btn-submit" style="margin-bottom:0; padding:0 20px; background:#00cec9;">📷 สแกนขาย</button>
                 </div>
 
                 <div class="table-wrapper">
-                    <h3>📋 รายงานสต๊อกสินค้าปัจจุบัน</h3>
+                    <h3>📋 รายงานคลังสินค้าแยกตามสี/ลายย่อย</h3>
                     <table>
                         <thead>
                             <tr>
                                 <th>รูปสินค้า</th>
                                 <th>รหัส SKU</th>
-                                <th>ชื่อสินค้า / สีย่อย</th>
+                                <th>ชื่อสินค้า / ตัวเลือกย่อย</th>
                                 <th>ราคา</th>
-                                <th>พร้อมขาย</th>
+                                <th>คลังคงเหลือ</th>
                                 <th>จัดการคลัง</th>
                             </tr>
                         </thead>
@@ -133,42 +136,49 @@
             <div id="receiptContent" style="text-align: left; font-size:14px; line-height: 20px;"></div>
             <div class="receipt-dash"></div>
             <h3 style="margin:5px 0;">ขอบคุณที่อุดหนุนครับ 💕</h3>
-            <button onclick="closeReceipt()" class="btn-submit" style="margin-top:15px; background:#6c5ce7;">ปิดหน้าต่าง</button>
+            <button onclick="closeReceipt()" class="btn-submit">ปิดหน้าต่าง</button>
         </div>
     </div>
 
     <script>
         let allProducts = [];
         let html5QrcodeScanner = null;
+        let activeScanInputId = null;
+        let variantCounter = 0;
 
-        async function initSystem() {
-            await loadProducts();
-        }
-
-        // ดึงหมวดหมู่แบบไดนามิกจากสินค้าที่มีอยู่ทั้งหมดในระบบมาทำเป็นที่เลื่อนเลือก
-        function updateCategoryDropdown(products) {
-            let categories = [...new Set(products.map(p => p.category).filter(Boolean))];
-            let select = document.getElementById('categorySelect');
-            select.innerHTML = '<option value="">-- เลื่อนเลือกหมวดหมู่ --</option>';
-            categories.forEach(cat => {
-                let opt = document.createElement('option');
-                opt.value = cat;
-                opt.innerText = cat;
-                select.appendChild(opt);
-            });
-        }
-
-        function syncCategorySelect() {
-            let selectValue = document.getElementById('categorySelect').value;
-            if (selectValue) {
-                document.getElementById('categoryInput').value = selectValue;
-            }
+        function addVariantBlock(sku='', variantName='', price='0', qty='') {
+            variantCounter++;
+            let id = `v_block_${variantCounter}`;
+            let html = `
+                <div class="variant-block" id="${id}">
+                    <button type="button" class="btn-remove-variant" onclick="document.getElementById('${id}').remove()">✕ ลบสีนี้</button>
+                    <h4>🎨 สี/ลายย่อยตัวเลือกที่ #${variantCounter}</h4>
+                    
+                    <button type="button" class="btn-scan-item" onclick="startScanner('${id}_sku', 'add')">📷 ยิงบาร์โค้ดสีนี้</button>
+                    <input type="text" class="v-sku" id="${id}_sku" placeholder="รหัส SKU / บาร์โค้ดเฉพาะสี" value="${sku}" required>
+                    
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        <input type="text" class="v-name" placeholder="ชื่อสี (เช่น ชมพู, ฟ้า)" value="${variantName}" required>
+                        <input type="number" class="v-price" placeholder="ราคา (บาท)" value="${price}" required>
+                    </div>
+                    <input type="number" class="v-qty" placeholder="จำนวนสต๊อกสีนี้" value="${qty}" required>
+                </div>
+            `;
+            document.getElementById('variantsContainer').insertAdjacentHTML('beforeend', html);
         }
 
         async function loadProducts() {
             let res = await fetch('/api/products');
             allProducts = await res.json();
-            updateCategoryDropdown(allProducts);
+            
+            let categories = [...new Set(allProducts.map(p => p.category).filter(Boolean))];
+            let select = document.getElementById('categorySelect');
+            select.innerHTML = '<option value="">-- เลื่อนเลือกหมวดหมู่ --</option>';
+            categories.forEach(cat => {
+                let opt = document.createElement('option');
+                opt.value = cat; opt.innerText = cat; select.appendChild(opt);
+            });
+
             renderTable(allProducts);
         }
 
@@ -180,76 +190,82 @@
                         <td><img src="${p.image_url}" class="product-img"></td>
                         <td><span class="badge-sku">${p.sku}</span></td>
                         <td>
-                            <div style="font-weight:600;">${p.name}</div>
-                            <span class="badge-variant">🎨 ${p.variant || 'ไม่มีระบุสี'}</span>
-                            <span style="font-size:11px; color:#aaa;">📁 ${p.category || 'ทั่วไป'}</span>
+                            <div style="font-weight:600; color:#2c3e50;">${p.name}</div>
+                            <span class="badge-variant">🎨 สี/แบบ: ${p.variant || 'ทั่วไป'}</span>
+                            <span style="font-size:11px; color:#aaa;">📁 ${p.category}</span>
                         </td>
                         <td style="font-weight:bold; color:#6c5ce7;">${p.price || 0} ฿</td>
-                        <td style="color:#10b981; font-weight:bold; font-size:16px;">${p.total_stock} ชิ้น</td>
+                        <td style="color:#10b981; font-weight:bold; font-size:15px;">${p.total_stock} ชิ้น</td>
                         <td>
                             <button onclick="handleStock('${p.id}', 'in')" class="btn-action btn-in">+ เติม</button>
                             <button onclick="handleStock('${p.id}', 'out')" class="btn-action btn-out">- ขาย</button>
-                            <button onclick="editProduct(${JSON.stringify(p).transformHtml()})" class="btn-action btn-edit">✏️ แก้ไข</button>
+                            <button onclick="deleteProduct('${p.id}')" class="btn-action btn-del">🗑️ ลบ</button>
                         </td>
                     </tr>
                 `;
             });
-            document.getElementById('productTableBody').innerHTML = html || '<tr><td colspan="6" style="text-align:center;">ไม่มีข้อมูลสินค้า</td></tr>';
+            document.getElementById('productTableBody').innerHTML = html || '<tr><td colspan="6" style="text-align:center;">ไม่มีสินค้าในคลัง</td></tr>';
         }
 
-        String.prototype.transformHtml = function() { return this.replace(/"/g, '&quot;'); };
-
-        function editProduct(product) {
-            document.getElementById('formTitle').innerText = "✏️ แก้ไขข้อมูลสินค้า";
-            document.getElementById('editingId').value = product.id;
-            document.getElementById('sku').value = product.sku;
-            document.getElementById('name').value = product.name;
-            document.getElementById('variant').value = product.variant || '';
-            document.getElementById('categoryInput').value = product.category || '';
-            document.getElementById('categorySelect').value = product.category || '';
-            document.getElementById('price').value = product.price || 0;
-            document.getElementById('qty').value = product.total_stock;
-            document.getElementById('submitBtn').innerText = "💾 อัปเดตข้อมูล";
-            document.getElementById('cancelEditBtn').style.display = "block";
+        function syncCategorySelect() {
+            let val = document.getElementById('categorySelect').value;
+            if (val) document.getElementById('categoryInput').value = val;
         }
 
-        function resetForm() {
-            document.getElementById('formTitle').innerText = "✨ เพิ่มสินค้าใหม่";
-            document.getElementById('productForm').reset();
-            document.getElementById('editingId').value = '';
-            document.getElementById('submitBtn').innerText = "💾 บันทึกสินค้าลงคลัง";
-            document.getElementById('cancelEditBtn').style.display = "none";
+        // ฟังก์ชันลบสินค้า 🟥
+        async function deleteProduct(id) {
+            if (confirm('คุณฟิล์มแน่ใจไหมครับว่าต้องการลบสินค้าชิ้นนี้ออกจากระบบอย่างถาวร?')) {
+                let res = await fetch(`/api/delete-product/${id}`, { method: 'DELETE' });
+                let data = await res.json();
+                if (data.success) {
+                    await loadProducts();
+                } else {
+                    alert('ไม่สามารถลบได้: ' + data.message);
+                }
+            }
         }
 
         document.getElementById('productForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            let blocks = document.querySelectorAll('.variant-block');
+            if (blocks.length === 0) {
+                alert('กรุณากดเพิ่มตัวเลือกสีย่อยอย่างน้อย 1 สีครับ');
+                return;
+            }
+
             let formData = new FormData();
-            let id = document.getElementById('editingId').value;
-            
-            formData.append('id', id);
-            formData.append('sku', document.getElementById('sku').value);
             formData.append('name', document.getElementById('name').value);
-            formData.append('variant', document.getElementById('variant').value);
-            formData.append('category', document.getElementById('categoryInput').value);
-            formData.append('price', document.getElementById('price').value);
-            formData.append('qty', document.getElementById('qty').value);
+            formData.append('category', document.getElementById('categoryInput').value || 'ทั่วไป');
             
             let fileInput = document.getElementById('imageFile');
             if (fileInput.files[0]) formData.append('image', fileInput.files[0]);
 
-            let url = id ? '/api/edit-product' : '/api/add-product';
-            let res = await fetch(url, { method: 'POST', body: formData });
+            let variantsData = [];
+            blocks.forEach(b => {
+                variantsData.push({
+                    sku: b.querySelector('.v-sku').value,
+                    variant: b.querySelector('.v-name').value,
+                    price: b.querySelector('.v-price').value,
+                    qty: b.querySelector('.v-qty').value
+                });
+            });
+            formData.append('variants', JSON.stringify(variantsData));
+
+            let res = await fetch('/api/add-product-bundle', { method: 'POST', body: formData });
             let data = await res.json();
             
             if (data.success) {
-                resetForm();
+                document.getElementById('productForm').reset();
+                document.getElementById('variantsContainer').innerHTML = '';
+                addVariantBlock();
                 await loadProducts();
             } else {
-                alert('ข้อผิดพลาด: ' + data.message);
+                alert('เซฟสต๊อกล้มเหลว: ' + data.message);
             }
         });
 
-        function startScanner(mode) {
+        function startScanner(inputId, mode) {
+            activeScanInputId = inputId;
             document.getElementById('scanner-container').style.display = 'block';
             html5QrcodeScanner = new Html5Qrcode("interactive");
             html5QrcodeScanner.start(
@@ -257,18 +273,15 @@
                 { fps: 10, qrbox: { width: 250, height: 120 } },
                 async (decodedText) => {
                     stopScanner();
-                    if (mode === 'add') {
-                        document.getElementById('sku').value = decodedText;
+                    if (mode === 'add' && activeScanInputId) {
+                        document.getElementById(activeScanInputId).value = decodedText;
                     } else if (mode === 'sell') {
                         let product = allProducts.find(p => p.sku === decodedText.trim());
-                        if (product) {
-                            await sellProductDirect(product.id, 1);
-                        } else {
-                            alert('ไม่พบสินค้ารหัสบาร์โค้ดนี้ในระบบคลังสินค้าครับ');
-                        }
+                        if (product) { await sellProductDirect(product.id, 1); } 
+                        else { alert('ไม่พบรหัสบาร์โค้ดสีนี้ในคลังสินค้าครับ'); }
                     }
                 }
-            ).catch(err => alert("ไม่สามารถเปิดกล้องได้: " + err));
+            ).catch(err => alert("เปิดกล้องไม่ได้: " + err));
         }
 
         function stopScanner() {
@@ -280,12 +293,10 @@
         }
 
         async function handleStock(id, action) {
-            let qty = prompt('ระบุจำนวนชิ้นที่ต้องการปรับย้าย:');
+            let qty = prompt('ระบุจำนวนชิ้น:');
             if (!qty || isNaN(qty)) return;
-            
-            if (action === 'out') {
-                await sellProductDirect(id, parseInt(qty));
-            } else {
+            if (action === 'out') { await sellProductDirect(id, parseInt(qty)); } 
+            else {
                 await fetch('/api/stock-action', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -305,26 +316,22 @@
             if (data.success) {
                 let p = allProducts.find(item => item.id == id);
                 let total = (p.price || 0) * quantity;
-                let dateStr = new Date().toLocaleString('th-TH');
-                
                 document.getElementById('receiptContent').innerHTML = `
-                    <b>วันที่:</b> ${dateStr}<br>
-                    <b>รายการสินค้า:</b> ${p.name}<br>
-                    <b>สีย่อย:</b> ${p.variant || 'ทั่วไป'}<br>
+                    <b>วันที่:</b> ${new Date().toLocaleString('th-TH')}<br>
+                    <b>สินค้า:</b> ${p.name}<br>
+                    <b>สี/แบบย่อย:</b> <span style="color:#6c5ce7; font-weight:bold;">${p.variant || 'ทั่วไป'}</span><br>
                     <b>ราคาต่อชิ้น:</b> ${p.price || 0} บาท<br>
-                    <b>จำนวน:</b> ${quantity} ชิ้น<br>
+                    <b>จำนวนขาย:</b> ${quantity} ชิ้น<br>
                     <div class="receipt-dash"></div>
-                    <b style="font-size:18px; color:#6c5ce7;">ยอดสุทธิ: ${total} บาท</b>
+                    <b style="font-size:18px; color:#10b981;">ยอดสุทธิ: ${total} บาท</b>
                 `;
                 document.getElementById('receiptModal').style.display = 'flex';
                 await loadProducts();
-            } else {
-                alert('ตัดสต๊อกล้มเหลว: ' + data.message);
-            }
+            } else { alert('ตัดสต๊อกล้มเหลว: ' + data.message); }
         }
 
         function closeReceipt() { document.getElementById('receiptModal').style.display = 'none'; }
-        
+
         function filterProducts() {
             let search = document.getElementById('searchInput').value.toLowerCase().trim();
             if (event.key === 'Enter' && search !== "") {
@@ -335,11 +342,12 @@
                     return;
                 }
             }
-            let filtered = allProducts.filter(p => p.sku.toLowerCase().includes(search) || p.name.toLowerCase().includes(search));
+            let filtered = allProducts.filter(p => p.sku.toLowerCase().includes(search) || p.name.toLowerCase().includes(search) || (p.variant && p.variant.toLowerCase().includes(search)));
             renderTable(filtered);
         }
 
-        initSystem();
+        addVariantBlock();
+        loadProducts();
     </script>
 </body>
 </html>
