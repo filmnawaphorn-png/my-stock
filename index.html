@@ -148,7 +148,7 @@
     </div>
 
     <script>
-        // แก้ไขฟังก์ชันแปลงข้อความป้องกัน JSON พังเรียบร้อยครับ
+        // ฟังก์ชันช่วยเคลียร์ข้อความแปลก ๆ ไม่ให้ JSON พัง
         String.prototype.transformHtml = function() {
             return this.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         };
@@ -158,6 +158,7 @@
         let activeScanInputId = null;
         let variantCounter = 0;
 
+        // ฟังก์ชันสร้างกล่องสีย่อย (กลับมาใช้งานได้สมบูรณ์แล้ว)
         function addVariantBlock(sku='', variantName='', price='0', qty='') {
             variantCounter++;
             let id = `v_block_${variantCounter}`;
@@ -197,7 +198,6 @@
         function renderTable(products) {
             let html = '';
             products.forEach(p => {
-                // แปลง object สินค้าให้อยู่ในรูปข้อความที่ปลอดภัยก่อนนำไปใส่ในปุ่มแก้ไข
                 let productStr = JSON.stringify(p).transformHtml();
                 html += `
                     <tr>
@@ -223,7 +223,6 @@
         }
 
         function editProduct(productStr) {
-            // ทำการแปลงกลับมาเป็น Object ปกติเพื่อนำมาเซ็ตค่าในฟอร์ม
             let div = document.createElement('div');
             div.innerHTML = productStr;
             let product = JSON.parse(div.innerText || div.textContent);
@@ -388,4 +387,24 @@
         function filterProducts() {
             let search = document.getElementById('searchInput').value.toLowerCase().trim();
             if (event.key === 'Enter' && search !== "") {
-                let found = allProducts
+                let found = allProducts.find(p => p.sku.toLowerCase() === search);
+                if (found) {
+                    sellProductDirect(found.id, 1);
+                    document.getElementById('searchInput').value = '';
+                    return;
+                }
+            }
+            let filtered = allProducts.filter(p => p.sku.toLowerCase().includes(search) || p.name.toLowerCase().includes(search) || (p.variant && p.variant.toLowerCase().includes(search)));
+            renderTable(filtered);
+        }
+
+        function syncCategorySelect() {
+            let val = document.getElementById('categorySelect').value;
+            if (val) document.getElementById('categoryInput').value = val;
+        }
+
+        addVariantBlock();
+        loadProducts();
+    </script>
+</body>
+</html>
