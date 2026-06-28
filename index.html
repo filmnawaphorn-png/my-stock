@@ -54,13 +54,22 @@
         .btn-edit { background: #e0e7ff; color: #4f46e5; }
         .btn-del { background: #ffeae8; color: #eb4d4b; }
 
-        /* 🧾 หน้าต่างใบเสร็จรับเงิน Modal */
+        /* 🧾 หน้าต่างป๊อปอัปใบเสร็จ */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
-        .receipt-box { background: white; width: 100%; max-width: 380px; border-radius: 20px; padding: 25px; text-align: center; border-top: 8px solid #6c5ce7; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+        .receipt-box { background: white; width: 100%; max-width: 380px; border-radius: 20px; padding: 25px; text-align: center; border-top: 8px solid #6c5ce7; box-shadow: 0 10px 30px rgba(0,0,0,0.15); position: relative; }
         .receipt-dash { border-top: 2px dashed #ccc; margin: 15px 0; }
         .receipt-box h2 { font-family: 'Mitr', sans-serif; margin: 0; color: #6c5ce7; font-size: 24px; }
         .receipt-box p { margin: 5px 0; font-size: 13px; color: #747d8c; }
         .receipt-details { text-align: left; font-family: 'Chakra Petch', sans-serif; font-size: 15px; line-height: 24px; color: #2c3e50; }
+
+        /* 🖨️ โค้ดส่วนคำสั่งพิมพ์สำหรับเครื่องปริ้น */
+        @media print {
+            body * { visibility: hidden; background: white !important; }
+            #receiptModal, #printArea, #printArea * { visibility: visible; }
+            #receiptModal { position: absolute; left: 0; top: 0; width: 100%; background: white !important; display: block !important; }
+            .receipt-box { border: none !important; box-shadow: none !important; width: 100% !important; max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
+            .no-print { display: none !important; }
+        }
     </style>
 </head>
 <body>
@@ -136,19 +145,22 @@
     </div>
 
     <div id="receiptModal" class="modal">
-        <div class="receipt-box">
+        <div class="receipt-box" id="printArea">
             <h2>Uni Stock ✨</h2>
             <p>ใบเสร็จรับเงินระบบคลัง / Official Receipt</p>
             <div class="receipt-dash"></div>
             <div id="receiptContent" class="receipt-details"></div>
             <div class="receipt-dash"></div>
-            <h3 style="margin:5px 0; font-family:'Mitr'; color:#6c5ce7; font-size:16px;">ตัดสต๊อกและบันทึกยอดขายสำเร็จ 💕</h3>
-            <button onclick="closeReceipt()" class="btn-submit" style="margin-top:15px; background:#10b981;">ตกลง (ปิดหน้าต่าง)</button>
+            <h3 style="margin:5px 0; font-family:'Mitr'; color:#6c5ce7; font-size:14px;" class="no-print">ตัดสต๊อกและบันทึกยอดขายสำเร็จ 💕</h3>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;" class="no-print">
+                <button onclick="window.print()" class="btn-submit" style="background:#8e44ad;">🖨️ พิมพ์ใบเสร็จ</button>
+                <button onclick="closeReceipt()" class="btn-submit" style="background:#10b981;">ตกลง (ปิด)</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // ฟังก์ชันช่วยเคลียร์ข้อความแปลก ๆ ไม่ให้ JSON พัง
         String.prototype.transformHtml = function() {
             return this.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         };
@@ -158,7 +170,6 @@
         let activeScanInputId = null;
         let variantCounter = 0;
 
-        // ฟังก์ชันสร้างกล่องสีย่อย (กลับมาใช้งานได้สมบูรณ์แล้ว)
         function addVariantBlock(sku='', variantName='', price='0', qty='') {
             variantCounter++;
             let id = `v_block_${variantCounter}`;
