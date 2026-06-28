@@ -3,69 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Uni Stock</title>
+    <title>Uni Stock Pro</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Mitr:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/html5-qrcode"></script>
     
     <style>
         body { font-family: 'Mitr', sans-serif; background: #fdfaf6; margin: 0; padding: 15px; color: #4a4a4a; }
-        .container { max-width: 1250px; margin: auto; }
-        
-        .header-area { text-align: center; margin-bottom: 25px; padding-top: 10px; }
-        .brand-logo { width: 90px; height: 90px; border-radius: 50%; box-shadow: 0 6px 16px rgba(108, 92, 231, 0.2); border: 4px solid white; animation: bounce 2s infinite; }
+        .container { max-width: 1300px; margin: auto; }
+        .header-area { text-align: center; margin-bottom: 25px; }
+        .brand-logo { width: 90px; height: 90px; border-radius: 50%; box-shadow: 0 6px 16px rgba(108, 92, 231, 0.2); border: 4px solid white; }
         .header-area h1 { color: #6c5ce7; font-weight: 600; margin: 10px 0 5px 0; font-size: 28px; }
-        .subtitle { color: #a4b0be; font-size: 13px; margin: 0; padding: 0 10px; }
         
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-6px); }
-        }
-
-        /* 📱 ปรับหน้าจอแยกฝั่ง รองรับทั้งคอมและมือถือ */
         .main-layout { display: block; }
         @media(min-width: 950px) { 
             body { padding: 30px; }
-            .main-layout { display: grid; grid-template-columns: 360px 1fr; gap: 25px; }
-            .header-area h1 { font-size: 34px; }
-            .brand-logo { width: 110px; height: 110px; }
+            .main-layout { display: grid; grid-template-columns: 380px 1fr; gap: 25px; }
         }
 
         .card { background: white; padding: 20px; border-radius: 24px; box-shadow: 0 8px 24px rgba(164, 176, 190, 0.12); border: 2px solid #f1f2f6; height: fit-content; margin-bottom: 25px; }
         .card h3 { margin-top: 0; color: #2c3e50; border-bottom: 3px dashed #ffeaa7; padding-bottom: 10px; font-size: 18px; }
 
-        input, select { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 14px; border: 2px solid #f1f2f6; box-sizing: border-box; background: #fafafa; font-size: 14px; font-family: 'Mitr', sans-serif; transition: 0.2s; -webkit-appearance: none; }
-        input:focus, select:focus { border-color: #a29bfe; outline: none; background: white; box-shadow: 0 0 8px rgba(162, 155, 254, 0.15); }
+        input, select { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 14px; border: 2px solid #f1f2f6; box-sizing: border-box; background: #fafafa; font-size: 14px; font-family: 'Mitr', sans-serif; }
+        input:focus, select:focus { border-color: #a29bfe; outline: none; background: white; }
         
-        .category-container { background: #f8f9fa; padding: 12px; border-radius: 16px; border: 2px solid #eef2f5; margin-bottom: 15px; }
-        .category-label { font-size: 12px; font-weight: bold; color: #6c5ce7; display: block; margin-bottom: 6px; }
-
-        .btn-submit { width: 100%; background: #6c5ce7; color: white; border: none; padding: 14px; border-radius: 14px; font-weight: bold; font-size: 16px; cursor: pointer; font-family: 'Mitr', sans-serif; transition: 0.2s; box-shadow: 0 4px 12px rgba(108, 92, 231, 0.25); -webkit-appearance: none; }
-        .btn-submit:hover { background: #5b4cc4; transform: translateY(-2px); }
-
-        .search-box-wrapper { background: white; padding: 12px 15px; border-radius: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); border: 2px solid #eef2f5; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-        .search-input { margin-bottom: 0; padding: 10px 12px; border-radius: 12px; }
-
-        /* 📦 จัดการตารางให้ปัดซ้าย-ขวาได้บนมือถือ ไม่บีบตัวหนังสือ */
+        .btn-submit { width: 100%; background: #6c5ce7; color: white; border: none; padding: 14px; border-radius: 14px; font-weight: bold; font-size: 16px; cursor: pointer; font-family: 'Mitr', sans-serif; box-shadow: 0 4px 12px rgba(108, 92, 231, 0.25); }
+        .btn-scan { background: #00cec9; color: white; margin-bottom: 15px; }
+        
         .table-wrapper { overflow-x: auto; background: white; border-radius: 24px; padding: 15px; box-shadow: 0 8px 24px rgba(164, 176, 190, 0.12); border: 2px solid #f1f2f6; }
-        @media(min-width: 950px) { .table-wrapper { padding: 25px; } }
-        
-        table { width: 100%; border-collapse: collapse; min-width: 750px; }
-        th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid #f1f2f6; font-size: 14px; vertical-align: middle; }
-        th { background: #f9fafd; color: #747d8c; font-weight: 600; font-size: 13px; }
+        table { width: 100%; border-collapse: collapse; min-width: 850px; }
+        th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid #f1f2f6; font-size: 14px; }
+        th { background: #f9fafd; color: #747d8c; }
 
-        .product-img { width: 55px; height: 55px; border-radius: 14px; object-fit: cover; border: 2px solid #fff; box-shadow: 0 4px 8px rgba(0,0,0,0.06); transition: 0.2s; }
+        .product-img { width: 55px; height: 55px; border-radius: 14px; object-fit: cover; }
+        .badge-sku { font-family: 'Chakra Petch', sans-serif; background: #f1f2f6; padding: 3px 6px; border-radius: 8px; font-weight: bold; }
+        .badge-variant { background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 6px; font-size: 11px; margin-right: 3px; display: inline-block; }
         
-        .badge-sku { font-family: 'Chakra Petch', sans-serif; background: #f1f2f6; padding: 3px 6px; border-radius: 8px; color: #57606f; font-weight: bold; font-size: 12px; }
-        .badge-cat { background: #f3e8ff; color: #7c3aed; padding: 2px 6px; border-radius: 8px; font-size: 11px; font-weight: bold; display: inline-block; }
-        
-        .btn-action { border: none; padding: 8px 10px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 13px; margin-right: 2px; font-family: 'Mitr', sans-serif; transition: 0.1s; display: inline-block; -webkit-appearance: none; }
+        .btn-action { border: none; padding: 6px 10px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; margin-right: 2px; font-family: 'Mitr', sans-serif; }
         .btn-in { background: #e8fbf1; color: #10b981; }
         .btn-hold { background: #fffbeb; color: #f59e0b; }
         .btn-out { background: #fef2f2; color: #ef4444; }
-        .btn-del { background: #f3f4f6; color: #6b7280; padding: 8px 8px; }
-        
-        .stock-num { font-family: 'Chakra Petch', sans-serif; font-size: 16px; font-weight: 700; }
+        .btn-edit { background: #e0e7ff; color: #4f46e5; }
+
+        /* 🧾 หน้าต่างใบเสร็จลอยแบบ Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; padding: 15px; box-sizing: border-box; }
+        .receipt-box { background: white; width: 100%; max-width: 380px; border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); font-family: 'Chakra Petch', 'Mitr', sans-serif; text-align: center; border-top: 8px solid #6c5ce7; }
+        .receipt-dash { border-top: 2px dashed #ccc; margin: 15px 0; }
     </style>
 </head>
 <body>
@@ -73,92 +57,80 @@
     <div class="container">
         <div class="header-area">
             <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='50' fill='%236c5ce7'/><circle cx='50' cy='52' r='26' fill='white'/><circle cx='38' cy='32' r='10' fill='white'/><circle cx='62' cy='32' r='10' fill='white'/><circle cx='38' cy='32' r='5' fill='%23ffb8b8'/><circle cx='62' cy='32' r='5' fill='%23ffb8b8'/><circle cx='44' cy='48' r='3' fill='%234a4a4a'/><circle cx='56' cy='48' r='3' fill='%234a4a4a'/><path d='M46 56 Q50 59 54 56' stroke='%234a4a4a' stroke-width='2.5' fill='none' stroke-linecap='round'/><rect x='36' y='64' width='28' height='20' rx='4' fill='%23ffeaa7'/><path d='M36 68 L50 76 L64 68' stroke='%23e67e22' stroke-width='1.5' fill='none'/></svg>" class="brand-logo" alt="Uni Stock Logo">
-            <h1>Uni Stock</h1>
-            <p class="subtitle">ระบบจัดการคลังสินค้าของ Unistock ☁️✨</p>
+            <h1>Uni Stock Pro 🚀</h1>
+            <p style="color:#a4b0be; font-size:13px; margin:0;">ระบบคลังสินค้า + ยิงบาร์โค้ดตัดขาย + ออกใบเสร็จ</p>
+        </div>
+
+        <div id="scanner-container" class="card" style="display: none; max-width: 500px; margin: 0 auto 20px auto;">
+            <h3>📷 สแกนบาร์โค้ดสินค้า</h3>
+            <div id="interactive" style="width: 100%;"></div>
+            <button onclick="stopScanner()" class="btn-submit" style="background:#ff7675; margin-top:10px;">❌ ปิดกล้อง</button>
         </div>
 
         <div class="main-layout">
             <div class="card">
-                <h3>✨ เพิ่มสินค้าใหม่</h3>
+                <h3 id="formTitle">✨ เพิ่มสินค้าใหม่</h3>
+                <button onclick="startScanner('add')" class="btn-submit btn-scan">📷 ยิงบาร์โค้ดแทนการพิมพ์</button>
+                
                 <form id="productForm">
-                    <input type="text" id="sku" placeholder="รหัส SKU (เช่น 4242)" required>
-                    <input type="text" id="name" placeholder="ชื่อสินค้า" required>
-                    
-                    <div class="category-container">
-                        <span class="category-label">📁 เลือกหมวดหมู่เดิม:</span>
-                        <select id="categorySelect" onchange="toggleCategoryInput()">
-                            <option value="">-- เลือกจากหมวดหมู่เดิม --</option>
-                        </select>
-                        
-                        <span class="category-label" style="margin-top: 8px;">✏️ หรือพิมพ์หมวดหมู่ใหม่:</span>
-                        <input type="text" id="categoryInput" placeholder="เช่น ปลอกคอ, ซองใส่การ์ด">
-                    </div>
-
-                    <input type="number" id="qty" placeholder="จำนวนสต๊อกเริ่มต้น" required>
+                    <input type="hidden" id="editingId">
+                    <input type="text" id="sku" placeholder="รหัส SKU / บาร์โค้ดสินค้า" required>
+                    <input type="text" id="name" placeholder="ชื่อสินค้า (เช่น ซองใส่การ์ด)" required>
+                    <input type="text" id="variant" placeholder="สี / คุณลักษณะย่อย (เช่น ชมพู, ฟ้า, ใส)">
+                    <input type="text" id="category" placeholder="หมวดหมู่สินค้า">
+                    <input type="number" id="price" placeholder="ราคาสินค้า (บาท)" required value="0">
+                    <input type="number" id="qty" placeholder="จำนวนสต๊อก" required>
                     
                     <label style="font-size: 12px; font-weight: bold; color: #747d8c; display: block; margin-bottom: 6px;">📸 รูปภาพสินค้า :</label>
                     <input type="file" id="imageFile" accept="image/*">
                     
-                    <button type="submit" class="btn-submit">💾 บันทึกสินค้าลงคลัง</button>
+                    <button type="submit" id="submitBtn" class="btn-submit">💾 บันทึกสินค้าลงคลัง</button>
+                    <button type="button" id="cancelEditBtn" class="btn-submit" style="background:#b2bec3; margin-top:8px; display:none;" onclick="resetForm()">❌ ยกเลิกการแก้ไข</button>
                 </form>
             </div>
 
             <div>
-                <div class="search-box-wrapper">
-                    <span style="font-size: 18px;">🔍</span>
-                    <input type="text" id="searchInput" class="search-input" placeholder="พิมพ์เพื่อค้นหา รหัส SKU หรือ ชื่อสินค้า..." onkeyup="filterProducts()">
+                <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-bottom: 20px;">
+                    <input type="text" id="searchInput" style="margin-bottom:0;" placeholder="🔍 พิมพ์หรือใช้เครื่องยิงบาร์โค้ดตรงนี้เพื่อค้นหา/ขาย..." onkeyup="filterProducts()">
+                    <button onclick="startScanner('sell')" class="btn-submit btn-scan" style="margin-bottom:0; padding:0 20px;">📷 สแกนขาย</button>
                 </div>
 
                 <div class="table-wrapper">
-                    <h3 style="margin-top:0; color:#2c3e50; font-size:16px;">📋 รายงานสต๊อกปัจจุบัน (เลื่อน ซ้าย-ขวา ได้)</h3>
+                    <h3>📋 รายงานสต๊อกสินค้าปัจจุบัน</h3>
                     <table>
                         <thead>
                             <tr>
                                 <th>รูปสินค้า</th>
                                 <th>รหัส SKU</th>
-                                <th>ชื่อสินค้า / หมวดหมู่</th>
-                                <th>คลังทั้งหมด</th>
-                                <th>โดนจอง</th>
+                                <th>ชื่อสินค้า / สี</th>
+                                <th>ราคา</th>
+                                <th>คลัง</th>
                                 <th>พร้อมขาย</th>
                                 <th>จัดการคลัง</th>
                             </tr>
                         </thead>
-                        <tbody id="productTableBody">
-                            <tr><td colspan="7" style="text-align: center; color: #999;">กำลังดึงข้อมูลคลังสินค้า...</td></tr>
-                        </tbody>
+                        <tbody id="productTableBody"></tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
 
+    <div id="receiptModal" class="modal">
+        <div class="receipt-box">
+            <h2 style="margin:0; color:#6c5ce7;">Uni Stock ✨</h2>
+            <p style="font-size:12px; margin:2px 0;">ใบเสร็จรับเงิน / Receipt</p>
+            <div class="receipt-dash"></div>
+            <div id="receiptContent" style="text-align: left; font-size:14px; line-height: 20px;"></div>
+            <div class="receipt-dash"></div>
+            <h3 style="margin:5px 0;">ขอบคุณที่อุดหนุนค่า 💕</h3>
+            <button onclick="closeReceipt()" class="btn-submit" style="margin-top:15px; background:#6c5ce7;">ปิดหน้าต่าง</button>
+        </div>
+    </div>
+
     <script>
         let allProducts = [];
-
-        async function loadSystemData() {
-            await loadCategories();
-            await loadProducts();
-        }
-
-        async function loadCategories() {
-            let res = await fetch('/api/categories');
-            let categories = await res.json();
-            let select = document.getElementById('categorySelect');
-            select.innerHTML = '<option value="">-- เลือกจากหมวดหมู่เดิม --</option>';
-            categories.forEach(cat => {
-                let opt = document.createElement('option');
-                opt.value = cat;
-                opt.innerText = cat;
-                select.appendChild(opt);
-            });
-        }
-
-        function toggleCategoryInput() {
-            let selectValue = document.getElementById('categorySelect').value;
-            if (selectValue) {
-                document.getElementById('categoryInput').value = selectValue;
-            }
-        }
+        let html5QrcodeScanner = null;
 
         async function loadProducts() {
             let res = await fetch('/api/products');
@@ -166,93 +138,183 @@
             renderTable(allProducts);
         }
 
+        // วาดตารางข้อมูลรองรับการแสดงผลแยกสีแยกประเภท
         function renderTable(products) {
             let html = '';
-            if (products.length === 0) {
-                html = `<tr><td colspan="7" style="text-align: center; color: #999; padding: 30px;">ไม่พบรายการสินค้าในคลัง...</td></tr>`;
-            } else {
-                products.forEach(p => {
-                    let available = p.total_stock - p.reserved_stock;
-                    html += `
-                        <tr>
-                            <td><img src="${p.image_url}" class="product-img" onerror="this.src='https://img.icons8.com/pastel-glyph/64/4a90e2/image--v1.png'"></td>
-                            <td><span class="badge-sku">${p.sku}</span></td>
-                            <td>
-                                <div style="font-weight: 600; color: #2c3e50; margin-bottom:4px; max-width:150px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.name}</div>
-                                <span class="badge-cat">📁 ${p.category || 'ทั่วไป'}</span>
-                            </td>
-                            <td class="stock-num" style="color: #4b5563;">${p.total_stock}</td>
-                            <td class="stock-num" style="color: #d97706;">${p.reserved_stock}</td>
-                            <td class="stock-num" style="color: #10b981; font-size: 17px;">${available}</td>
-                            <td style="white-space: nowrap;">
-                                <button onclick="handleStock('${p.sku}', 'in')" class="btn-action btn-in">+ เติม</button>
-                                <button onclick="handleStock('${p.sku}', 'reserve')" class="btn-action btn-hold">⏳ จอง</button>
-                                <button onclick="handleStock('${p.sku}', 'out')" class="btn-action btn-out">- ขาย</button>
-                                <button onclick="deleteProduct('${p.sku}')" class="btn-action btn-del">🗑️</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-            }
-            document.getElementById('productTableBody').innerHTML = html;
-        }
-
-        function filterProducts() {
-            let searchText = document.getElementById('searchInput').value.toLowerCase().trim();
-            let filtered = allProducts.filter(p => {
-                return p.sku.toLowerCase().includes(searchText) || p.name.toLowerCase().includes(searchText);
+            products.forEach(p => {
+                let available = p.total_stock - (p.reserved_stock || 0);
+                html += `
+                    <tr>
+                        <td><img src="${p.image_url}" class="product-img"></td>
+                        <td><span class="badge-sku">${p.sku}</span></td>
+                        <td>
+                            <div style="font-weight:600;">${p.name}</div>
+                            ${p.variant ? `<span class="badge-variant">🎨 สี: ${p.variant}</span>` : ''}
+                            <span style="font-size:11px; color:#aaa;">📁 ${p.category || 'ทั่วไป'}</span>
+                        </td>
+                        <td style="font-weight:bold; color:#6c5ce7;">${p.price || 0} ฿</td>
+                        <td>${p.total_stock}</td>
+                        <td style="color:#10b981; font-weight:bold;">${available}</td>
+                        <td>
+                            <button onclick="handleStock('${p.id}', 'in')" class="btn-action btn-in">+ เติม</button>
+                            <button onclick="handleStock('${p.id}', 'out')" class="btn-action btn-out">- ขาย</button>
+                            <button onclick="editProduct(${JSON.stringify(p).transformHtml()})" class="btn-action btn-edit">✏️ แก้ไข</button>
+                        </td>
+                    </tr>
+                `;
             });
-            renderTable(filtered);
+            document.getElementById('productTableBody').innerHTML = html || '<tr><td colspan="7" style="text-align:center;">ไม่มีข้อมูลสินค้า</td></tr>';
         }
 
+        String.prototype.transformHtml = function() { return this.replace(/"/g, '&quot;'); };
+
+        // ✏️ ฟังก์ชันดึงข้อมูลมาแก้ในฟอร์ม
+        function editProduct(product) {
+            document.getElementById('formTitle').innerText = "✏️ แก้ไขข้อมูลสินค้า";
+            document.getElementById('editingId').value = product.id;
+            document.getElementById('sku').value = product.sku;
+            document.getElementById('name').value = product.name;
+            document.getElementById('variant').value = product.variant || '';
+            document.getElementById('category').value = product.category || '';
+            document.getElementById('price').value = product.price || 0;
+            document.getElementById('qty').value = product.total_stock;
+            document.getElementById('submitBtn').innerText = "💾 อัปเดตข้อมูล";
+            document.getElementById('cancelEditBtn').style.display = "block";
+        }
+
+        function resetForm() {
+            document.getElementById('formTitle').innerText = "✨ เพิ่มสินค้าใหม่";
+            document.getElementById('productForm').reset();
+            document.getElementById('editingId').value = '';
+            document.getElementById('submitBtn').innerText = "💾 บันทึกสินค้าลงคลัง";
+            document.getElementById('cancelEditBtn').style.display = "none";
+        }
+
+        // บันทึก หรือ แก้ไขข้อมูล
         document.getElementById('productForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             let formData = new FormData();
+            let id = document.getElementById('editingId').value;
+            
+            formData.append('id', id);
             formData.append('sku', document.getElementById('sku').value);
             formData.append('name', document.getElementById('name').value);
-            formData.append('category', document.getElementById('categoryInput').value);
+            formData.append('variant', document.getElementById('variant').value);
+            formData.append('category', document.getElementById('category').value);
+            formData.append('price', document.getElementById('price').value);
             formData.append('qty', document.getElementById('qty').value);
             
             let fileInput = document.getElementById('imageFile');
-            if (fileInput.files[0]) {
-                formData.append('image', fileInput.files[0]);
-            }
+            if (fileInput.files[0]) formData.append('image', fileInput.files[0]);
 
-            let res = await fetch('/api/add-product', { method: 'POST', body: formData });
+            let url = id ? '/api/edit-product' : '/api/add-product';
+            let res = await fetch(url, { method: 'POST', body: formData });
             let data = await res.json();
             
             if (data.success) {
-                document.getElementById('productForm').reset();
-                await loadSystemData();
+                resetForm();
+                loadProducts();
             } else {
-                alert('บันทึกไม่สำเร็จ: ' + data.message);
+                alert('ข้อผิดพลาด: ' + data.message);
             }
         });
 
-        async function handleStock(sku, action) {
+        // 📷 ฟังก์ชันสแกนบาร์โค้ดด้วยกล้องมือถือ
+        function startScanner(mode) {
+            document.getElementById('scanner-container').style.display = 'block';
+            html5QrcodeScanner = new Html5Qrcode("interactive");
+            html5QrcodeScanner.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: { width: 250, height: 120 } },
+                async (decodedText) => {
+                    stopScanner();
+                    if (mode === 'add') {
+                        document.getElementById('sku').value = decodedText;
+                    } else if (mode === 'sell') {
+                        // สแกนเพื่อขายออกทันที 1 ชิ้นและพิมพ์ใบเสร็จ
+                        let product = allProducts.find(p => p.sku === decodedText.trim());
+                        if (product) {
+                            await sellProductDirect(product.id, 1);
+                        } else {
+                            alert('ไม่พบสินค้ารหัสบาร์โค้ดนี้ในระบบคลังสินค้าครับ');
+                        }
+                    }
+                }
+            ).catch(err => alert("ไม่สามารถเปิดกล้องได้: " + err));
+        }
+
+        function stopScanner() {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.stop().then(() => {
+                    document.getElementById('scanner-container').style.display = 'none';
+                });
+            }
+        }
+
+        // ปุ่มปรับเพิ่ม-ลด สต๊อกด่วนในตาราง
+        async function handleStock(id, action) {
             let qty = prompt('ระบุจำนวนชิ้นที่ต้องการปรับย้าย:');
             if (!qty || isNaN(qty)) return;
+            
+            if (action === 'out') {
+                await sellProductDirect(id, parseInt(qty));
+            } else {
+                await fetch('/api/stock-action', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, action, quantity: parseInt(qty) })
+                });
+                loadProducts();
+            }
+        }
 
+        // 🧾 ฟังก์ชันสแกนหรือกดขายปุ๊บ ตัดสต๊อกและเด้งใบเสร็จขึ้นมาทันที
+        async function sellProductDirect(id, quantity) {
             let res = await fetch('/api/stock-action', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sku, action, quantity: parseInt(qty) })
+                body: JSON.stringify({ id, action: 'out', quantity })
             });
             let data = await res.json();
-            if (data.success) { await loadSystemData(); } else { alert('ทำรายการไม่สำเร็จ'); }
+            if (data.success) {
+                // เด้งป๊อปอัปใบเสร็จรับเงินทันที
+                let p = allProducts.find(item => item.id == id);
+                let total = (p.price || 0) * quantity;
+                let dateStr = new Date().toLocaleString('th-TH');
+                
+                document.getElementById('receiptContent').innerHTML = `
+                    <b>วันที่:</b> ${dateStr}<br>
+                    <b>รายการสินค้า:</b> ${p.name}<br>
+                    ${p.variant ? `<b>สี/ย่อย:</b> ${p.variant}<br>` : ''}
+                    <b>ราคาต่อชิ้น:</b> ${p.price || 0} บาท<br>
+                    <b>จำนวน:</b> ${quantity} ชิ้น<br>
+                    <div class="receipt-dash"></div>
+                    <b style="font-size:18px; color:#6c5ce7;">ยอดสุทธิ: ${total} บาท</b>
+                `;
+                document.getElementById('receiptModal').style.display = 'flex';
+                loadProducts();
+            } else {
+                alert('ตัดสต๊อกล้มเหลว: ' + data.message);
+            }
         }
 
-        async function deleteProduct(sku) {
-            if (!confirm('ต้องการลบสินค้ารหัส ' + sku + ' ออกจากคลังถาวรใช่ไหม?')) return;
-            await fetch('/api/delete-product', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sku })
-            });
-            await loadSystemData();
+        function closeReceipt() { document.getElementById('receiptModal').style.display = 'none'; }
+        function filterProducts() {
+            let search = document.getElementById('searchInput').value.toLowerCase().trim();
+            // ถ้าใช้เครื่องยิงบาร์โค้ดเสียบคอม พอยิงเสร็จมันจะกด Enter อัตโนมัติ ให้ตรวจจับและขายทันทีได้เลย
+            if (event.key === 'Enter' && search !== "") {
+                let found = allProducts.find(p => p.sku.toLowerCase() === search);
+                if (found) {
+                    sellProductDirect(found.id, 1);
+                    document.getElementById('searchInput').value = '';
+                    return;
+                }
+            }
+            let filtered = allProducts.filter(p => p.sku.toLowerCase().includes(search) || p.name.toLowerCase().includes(search));
+            renderTable(filtered);
         }
 
-        loadSystemData();
+        loadProducts();
     </script>
 </body>
 </html>
