@@ -51,7 +51,8 @@
         .btn-action { border: none; padding: 6px 10px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; margin-right: 2px; font-family: 'Mitr', sans-serif; }
         .btn-in { background: #e8fbf1; color: #10b981; }
         .btn-out { background: #fef2f2; color: #ef4444; }
-        .btn-del { background: #ffeae8; color: #eb4d4b; } /* 🟥 ปุ่มลบสินค้า */
+        .btn-edit { background: #e0e7ff; color: #4f46e5; } /* ✏️ ปุ่มแก้ไข */
+        .btn-del { background: #ffeae8; color: #eb4d4b; }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
         .receipt-box { background: white; width: 100%; max-width: 380px; border-radius: 20px; padding: 25px; text-align: center; border-top: 8px solid #6c5ce7; font-family: 'Chakra Petch', 'Mitr', sans-serif; }
@@ -75,9 +76,9 @@
 
         <div class="main-layout">
             <div class="card">
-                <h3>✨ บันทึกสินค้าลงคลัง</h3>
+                <h3 id="formTitle">✨ บันทึกสินค้าลงคลัง</h3>
                 <form id="productForm">
-                    <input type="text" id="name" placeholder="ชื่อสินค้าหลัก (เช่น ซองใส่การ์ด)" required>
+                    <input type="hidden" id="editingId"> <input type="text" id="name" placeholder="ชื่อสินค้าหลัก (เช่น ซองใส่การ์ด)" required>
                     
                     <div class="category-group">
                         <span class="category-title">📁 หมวดหมู่เดิมที่มี:</span>
@@ -96,9 +97,10 @@
                     
                     <div id="variantsContainer"></div>
 
-                    <button type="button" class="btn-add-variant" onclick="addVariantBlock()">➕ คลิกเพิ่ม สี / ตัวเลือกลายย่อย</button>
+                    <button type="button" id="addVariantBtn" class="btn-add-variant" onclick="addVariantBlock()">➕ คลิกเพิ่ม สี / ตัวเลือกลายย่อย</button>
                     
-                    <button type="submit" class="btn-submit">💾 บันทึกสินค้าและสีย่อยทั้งหมด</button>
+                    <button type="submit" id="submitBtn" class="btn-submit">💾 บันทึกสินค้าและสีย่อยทั้งหมด</button>
+                    <button type="button" id="cancelEditBtn" class="btn-submit" style="background:#b2bec3; margin-top:8px; display:none;" onclick="resetForm()">❌ ยกเลิกการแก้ไข</button>
                 </form>
             </div>
 
@@ -154,7 +156,7 @@
                     <button type="button" class="btn-remove-variant" onclick="document.getElementById('${id}').remove()">✕ ลบสีนี้</button>
                     <h4>🎨 สี/ลายย่อยตัวเลือกที่ #${variantCounter}</h4>
                     
-                    <button type="button" class="btn-scan-item" onclick="startScanner('${id}_sku', 'add')">📷 ยิงบาร์โค้ดสีนี้</button>
+                    <button type="button" class="btn-scan-item" id="${id}_btn" onclick="startScanner('${id}_sku', 'add')">📷 ยิงบาร์โค้ดสีนี้</button>
                     <input type="text" class="v-sku" id="${id}_sku" placeholder="รหัส SKU / บาร์โค้ดเฉพาะสี" value="${sku}" required>
                     
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
@@ -199,6 +201,7 @@
                         <td>
                             <button onclick="handleStock('${p.id}', 'in')" class="btn-action btn-in">+ เติม</button>
                             <button onclick="handleStock('${p.id}', 'out')" class="btn-action btn-out">- ขาย</button>
+                            <button onclick="editProduct(${JSON.stringify(p).transformHtml()})" class="btn-action btn-edit">✏️ แก้ไข</button>
                             <button onclick="deleteProduct('${p.id}')" class="btn-action btn-del">🗑️ ลบ</button>
                         </td>
                     </tr>
@@ -207,29 +210,52 @@
             document.getElementById('productTableBody').innerHTML = html || '<tr><td colspan="6" style="text-align:center;">ไม่มีสินค้าในคลัง</td></tr>';
         }
 
-        function syncCategorySelect() {
-            let val = document.getElementById('categorySelect').value;
-            if (val) document.getElementById('categoryInput').value = val;
+        String.prototype.transformHtml = function() { return this.replace(/"/g, '&quot;'); };
+
+        // ✏️ ฟังก์ชันดึงข้อมูสีย่อยกลับมาแก้ไขที่ฟอร์มด้านซ้าย
+        function editProduct(product) {
+            document.getElementById('formTitle').innerText = "✏️ แก้ไขข้อมูลสินค้า";
+            document.getElementById('editingId').value = product.id;
+            document.getElementById('name').value = product.name;
+            document.getElementById('categoryInput').value = product.category || 'ทั่วไป';
+            document.getElementById('categorySelect').value = product.category || 'ทั่วไป';
+            
+            // ล้างกล่องย่อยเก่า แล้วเปิดแค่บล็อกเดียวเพื่อแก้เฉพาะตัวที่เลือก
+            document.getElementById('variantsContainer').innerHTML = '';
+            addVariantBlock(product.sku, product.variant, product.price, product.total_stock);
+            
+            // ซ่อนปุ่มเพิ่มสีย่อยชั่วคราวตอนแก้ไข เพื่อไม่ให้งง
+            document.getElementById('addVariantBtn').style.display = 'none';
+            document.getElementById('submitBtn').innerText = "💾 อัปเดตข้อมูลสินค้านี้";
+            document.getElementById('cancelEditBtn').style.display = "block";
         }
 
-        // ฟังก์ชันลบสินค้า 🟥
+        function resetForm() {
+            document.getElementById('formTitle').innerText = "✨ บันทึกสินค้าลงคลัง";
+            document.getElementById('productForm').reset();
+            document.getElementById('editingId').value = '';
+            document.getElementById('variantsContainer').innerHTML = '';
+            document.getElementById('addVariantBtn').style.display = 'block';
+            document.getElementById('submitBtn').innerText = "💾 บันทึกสินค้าและสีย่อยทั้งหมด";
+            document.getElementById('cancelEditBtn').style.display = "none";
+            addVariantBlock();
+        }
+
         async function deleteProduct(id) {
             if (confirm('คุณฟิล์มแน่ใจไหมครับว่าต้องการลบสินค้าชิ้นนี้ออกจากระบบอย่างถาวร?')) {
                 let res = await fetch(`/api/delete-product/${id}`, { method: 'DELETE' });
                 let data = await res.json();
-                if (data.success) {
-                    await loadProducts();
-                } else {
-                    alert('ไม่สามารถลบได้: ' + data.message);
-                }
+                if (data.success) { await loadProducts(); } else { alert('ไม่สามารถลบได้: ' + data.message); }
             }
         }
 
         document.getElementById('productForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            let id = document.getElementById('editingId').value;
             let blocks = document.querySelectorAll('.variant-block');
+            
             if (blocks.length === 0) {
-                alert('กรุณากดเพิ่มตัวเลือกสีย่อยอย่างน้อย 1 สีครับ');
+                alert('กรุณากรอกข้อมูลตัวเลือกสีอย่างน้อย 1 สีครับ');
                 return;
             }
 
@@ -240,27 +266,33 @@
             let fileInput = document.getElementById('imageFile');
             if (fileInput.files[0]) formData.append('image', fileInput.files[0]);
 
-            let variantsData = [];
-            blocks.forEach(b => {
-                variantsData.push({
-                    sku: b.querySelector('.v-sku').value,
-                    variant: b.querySelector('.v-name').value,
-                    price: b.querySelector('.v-price').value,
-                    qty: b.querySelector('.v-qty').value
-                });
-            });
-            formData.append('variants', JSON.stringify(variantsData));
+            if (id) {
+                // โหมดแก้ไขชิ้นเดี่ยว
+                formData.append('id', id);
+                formData.append('sku', blocks[0].querySelector('.v-sku').value);
+                formData.append('variant', blocks[0].querySelector('.v-name').value);
+                formData.append('price', blocks[0].querySelector('.v-price').value);
+                formData.append('qty', blocks[0].querySelector('.v-qty').value);
 
-            let res = await fetch('/api/add-product-bundle', { method: 'POST', body: formData });
-            let data = await res.json();
-            
-            if (data.success) {
-                document.getElementById('productForm').reset();
-                document.getElementById('variantsContainer').innerHTML = '';
-                addVariantBlock();
-                await loadProducts();
+                let res = await fetch('/api/edit-product', { method: 'POST', body: formData });
+                let data = await res.json();
+                if (data.success) { resetForm(); await loadProducts(); } else { alert('อัปเดตล้มเหลว: ' + data.message); }
             } else {
-                alert('เซฟสต๊อกล้มเหลว: ' + data.message);
+                // โหมดบันทึกแบบกลุ่มปกติ
+                let variantsData = [];
+                blocks.forEach(b => {
+                    variantsData.push({
+                        sku: b.querySelector('.v-sku').value,
+                        variant: b.querySelector('.v-variant' || b.querySelector('.v-name')).value,
+                        price: b.querySelector('.v-price').value,
+                        qty: b.querySelector('.v-qty').value
+                    });
+                });
+                formData.append('variants', JSON.stringify(variantsData));
+
+                let res = await fetch('/api/add-product-bundle', { method: 'POST', body: formData });
+                let data = await res.json();
+                if (data.success) { resetForm(); await loadProducts(); } else { alert('บันทึกล้มเหลว: ' + data.message); }
             }
         });
 
@@ -344,6 +376,11 @@
             }
             let filtered = allProducts.filter(p => p.sku.toLowerCase().includes(search) || p.name.toLowerCase().includes(search) || (p.variant && p.variant.toLowerCase().includes(search)));
             renderTable(filtered);
+        }
+
+        function syncCategorySelect() {
+            let val = document.getElementById('categorySelect').value;
+            if (val) document.getElementById('categoryInput').value = val;
         }
 
         addVariantBlock();
