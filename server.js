@@ -19,7 +19,7 @@ app.get('/api/products', async (req, res) => {
     res.json(data || []);
 });
 
-// บันทึกสินค้าหลัก + สีย่อยเป็นกลุ่ม
+// บันทึกกลุ่มสินค้าหลัก + สีย่อย
 app.post('/api/add-product-bundle', upload.single('image'), async (req, res) => {
     try {
         const { name, category, variants } = req.body;
@@ -55,7 +55,7 @@ app.post('/api/add-product-bundle', upload.single('image'), async (req, res) => 
     }
 });
 
-// ✏️ API สำหรับบันทึกการแก้ไขข้อมูลสินค้าชิ้นนั้น ๆ
+// API แก้ไขข้อมูลสินค้ารายชิ้น
 app.post('/api/edit-product', upload.single('image'), async (req, res) => {
     try {
         const { id, sku, name, variant, category, price, qty } = req.body;
@@ -85,7 +85,7 @@ app.post('/api/edit-product', upload.single('image'), async (req, res) => {
     }
 });
 
-// ลบสินค้าออก
+// API ลบสินค้าเดี่ยว
 app.delete('/api/delete-product/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -97,7 +97,7 @@ app.delete('/api/delete-product/:id', async (req, res) => {
     }
 });
 
-// ปรับเพิ่มลดสต๊อก
+// API จัดการคลังสินค้า (ตัดออก/เติมเข้า)
 app.post('/api/stock-action', async (req, res) => {
     const { id, action, quantity } = req.body;
     const { data: product } = await supabase.from('products').select('*').eq('id', id).single();
@@ -115,4 +115,4 @@ app.post('/api/stock-action', async (req, res) => {
     res.json({ success: true });
 });
 
-app.listen(3000, () => console.log('🚀 Server is running!'));
+app.listen(3000, () => console.log('🚀 Server is running on port 3000!'));
