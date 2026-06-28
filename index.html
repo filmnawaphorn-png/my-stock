@@ -105,4 +105,287 @@
                     <button type="button" id="addVariantBtn" class="btn-add-variant" onclick="addVariantBlock()">➕ คลิกเพิ่ม สี / ตัวเลือกลายย่อย</button>
                     
                     <button type="submit" id="submitBtn" class="btn-submit">💾 บันทึกสินค้าและสีย่อยทั้งหมด</button>
-                    <button type="button" id="cancelEdit
+                    <button type="button" id="cancelEditBtn" class="btn-submit" style="background:#b2bec3; margin-top:8px; display:none;" onclick="resetForm()">❌ ยกเลิกการแก้ไข</button>
+                </form>
+            </div>
+
+            <div>
+                <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-bottom: 20px;">
+                    <input type="text" id="searchInput" style="margin-bottom:0;" placeholder="🔍 พิมพ์หรือยิงบาร์โค้ดเพื่อค้นหาหรือตัดขายออก..." onkeyup="filterProducts()">
+                    <button onclick="startScanner(null, 'sell')" class="btn-submit" style="margin-bottom:0; padding:0 20px; background:#00cec9;">📷 สแกนขาย</button>
+                </div>
+
+                <div class="table-wrapper">
+                    <h3>📋 รายงานคลังสินค้าแยกตามสี/ลายย่อย</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>รูปสินค้า</th>
+                                <th>รหัส SKU</th>
+                                <th>ชื่อสินค้า / ตัวเลือกย่อย</th>
+                                <th>ราคา</th>
+                                <th>คลังคงเหลือ</th>
+                                <th>จัดการคลัง</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="receiptModal" class="modal">
+        <div class="receipt-box">
+            <h2>Uni Stock ✨</h2>
+            <p>ใบเสร็จรับเงินระบบคลัง / Official Receipt</p>
+            <div class="receipt-dash"></div>
+            <div id="receiptContent" class="receipt-details"></div>
+            <div class="receipt-dash"></div>
+            <h3 style="margin:5px 0; font-family:'Mitr'; color:#6c5ce7; font-size:16px;">ตัดสต๊อกและบันทึกยอดขายสำเร็จ 💕</h3>
+            <button onclick="closeReceipt()" class="btn-submit" style="margin-top:15px; background:#10b981;">ตกลง (ปิดหน้าต่าง)</button>
+        </div>
+    </div>
+
+    <script>
+        // แก้ไขฟังก์ชันแปลงข้อความป้องกัน JSON พังเรียบร้อยครับ
+        String.prototype.transformHtml = function() {
+            return this.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        };
+
+        let allProducts = [];
+        let html5QrcodeScanner = null;
+        let activeScanInputId = null;
+        let variantCounter = 0;
+
+        function addVariantBlock(sku='', variantName='', price='0', qty='') {
+            variantCounter++;
+            let id = `v_block_${variantCounter}`;
+            let html = `
+                <div class="variant-block" id="${id}">
+                    <button type="button" class="btn-remove-variant" onclick="document.getElementById('${id}').remove()">✕ ลบสีนี้</button>
+                    <h4>🎨 สี/ลายย่อยตัวเลือกที่ #${variantCounter}</h4>
+                    
+                    <button type="button" class="btn-scan-item" id="${id}_btn" onclick="startScanner('${id}_sku', 'add')">📷 ยิงบาร์โค้ดสีนี้</button>
+                    <input type="text" class="v-sku" id="${id}_sku" placeholder="รหัส SKU / บาร์โค้ดเฉพาะสี" value="${sku}" required>
+                    
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        <input type="text" class="v-name" placeholder="ชื่อสี (เช่น ชมพู, ฟ้า)" value="${variantName}" required>
+                        <input type="number" class="v-price" placeholder="ราคา (บาท)" value="${price}" required>
+                    </div>
+                    <input type="number" class="v-qty" placeholder="จำนวนสต๊อกสีนี้" value="${qty}" required>
+                </div>
+            `;
+            document.getElementById('variantsContainer').insertAdjacentHTML('beforeend', html);
+        }
+
+        async function loadProducts() {
+            let res = await fetch('/api/products');
+            allProducts = await res.json();
+            
+            let categories = [...new Set(allProducts.map(p => p.category).filter(Boolean))];
+            let select = document.getElementById('categorySelect');
+            select.innerHTML = '<option value="">-- เลื่อนเลือกหมวดหมู่ --</option>';
+            categories.forEach(cat => {
+                let opt = document.createElement('option');
+                opt.value = cat; opt.innerText = cat; select.appendChild(opt);
+            });
+
+            renderTable(allProducts);
+        }
+
+        function renderTable(products) {
+            let html = '';
+            products.forEach(p => {
+                // แปลง object สินค้าให้อยู่ในรูปข้อความที่ปลอดภัยก่อนนำไปใส่ในปุ่มแก้ไข
+                let productStr = JSON.stringify(p).transformHtml();
+                html += `
+                    <tr>
+                        <td><img src="${p.image_url}" class="product-img"></td>
+                        <td><span class="badge-sku">${p.sku}</span></td>
+                        <td>
+                            <div style="font-weight:600; color:#2c3e50;">${p.name}</div>
+                            <span class="badge-variant">🎨 สี/แบบ: ${p.variant || 'ทั่วไป'}</span>
+                            <span style="font-size:11px; color:#aaa;">📁 ${p.category}</span>
+                        </td>
+                        <td style="font-weight:bold; color:#6c5ce7;">${p.price || 0} ฿</td>
+                        <td style="color:#10b981; font-weight:bold; font-size:15px;">${p.total_stock} ชิ้น</td>
+                        <td>
+                            <button onclick="handleStock('${p.id}', 'in')" class="btn-action btn-in">+ เติม</button>
+                            <button onclick="handleStock('${p.id}', 'out')" class="btn-action btn-out">- ขาย</button>
+                            <button onclick="editProduct('${productStr}')" class="btn-action btn-edit">✏️ แก้ไข</button>
+                            <button onclick="deleteProduct('${p.id}')" class="btn-action btn-del">🗑️ ลบ</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            document.getElementById('productTableBody').innerHTML = html || '<tr><td colspan="6" style="text-align:center;">ไม่มีสินค้าในคลัง</td></tr>';
+        }
+
+        function editProduct(productStr) {
+            // ทำการแปลงกลับมาเป็น Object ปกติเพื่อนำมาเซ็ตค่าในฟอร์ม
+            let div = document.createElement('div');
+            div.innerHTML = productStr;
+            let product = JSON.parse(div.innerText || div.textContent);
+
+            document.getElementById('formTitle').innerText = "✏️ แก้ไขข้อมูลสินค้า";
+            document.getElementById('editingId').value = product.id;
+            document.getElementById('name').value = product.name;
+            document.getElementById('categoryInput').value = product.category || 'ทั่วไป';
+            document.getElementById('categorySelect').value = product.category || 'ทั่วไป';
+            
+            document.getElementById('variantsContainer').innerHTML = '';
+            addVariantBlock(product.sku, product.variant, product.price, product.total_stock);
+            
+            document.getElementById('addVariantBtn').style.display = 'none';
+            document.getElementById('submitBtn').innerText = "💾 อัปเดตข้อมูลสินค้านี้";
+            document.getElementById('cancelEditBtn').style.display = "block";
+        }
+
+        function resetForm() {
+            document.getElementById('formTitle').innerText = "✨ บันทึกสินค้าลงคลัง";
+            document.getElementById('productForm').reset();
+            document.getElementById('editingId').value = '';
+            document.getElementById('variantsContainer').innerHTML = '';
+            document.getElementById('addVariantBtn').style.display = 'block';
+            document.getElementById('submitBtn').innerText = "💾 บันทึกสินค้าและสีย่อยทั้งหมด";
+            document.getElementById('cancelEditBtn').style.display = "none";
+            addVariantBlock();
+        }
+
+        async function deleteProduct(id) {
+            if (confirm('คุณฟิล์มแน่ใจไหมครับว่าต้องการลบสินค้าชิ้นนี้ออกจากระบบอย่างถาวร?')) {
+                let res = await fetch(`/api/delete-product/${id}`, { method: 'DELETE' });
+                let data = await res.json();
+                if (data.success) { await loadProducts(); } else { alert('ไม่สามารถลบได้: ' + data.message); }
+            }
+        }
+
+        document.getElementById('productForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            let id = document.getElementById('editingId').value;
+            let blocks = document.querySelectorAll('.variant-block');
+            
+            if (blocks.length === 0) {
+                alert('กรุณากรอกข้อมูลตัวเลือกสีอย่างน้อย 1 สีครับ');
+                return;
+            }
+
+            let formData = new FormData();
+            formData.append('name', document.getElementById('name').value);
+            formData.append('category', document.getElementById('categoryInput').value || 'ทั่วไป');
+            
+            let fileInput = document.getElementById('imageFile');
+            if (fileInput.files[0]) formData.append('image', fileInput.files[0]);
+
+            if (id) {
+                formData.append('id', id);
+                formData.append('sku', blocks[0].querySelector('.v-sku').value);
+                formData.append('variant', blocks[0].querySelector('.v-name').value);
+                formData.append('price', blocks[0].querySelector('.v-price').value);
+                formData.append('qty', blocks[0].querySelector('.v-qty').value);
+
+                let res = await fetch('/api/edit-product', { method: 'POST', body: formData });
+                let data = await res.json();
+                if (data.success) { resetForm(); await loadProducts(); } else { alert('อัปเดตล้มเหลว: ' + data.message); }
+            } else {
+                let variantsData = [];
+                blocks.forEach(b => {
+                    variantsData.push({
+                        sku: b.querySelector('.v-sku').value,
+                        variant: b.querySelector('.v-name').value,
+                        price: b.querySelector('.v-price').value,
+                        qty: b.querySelector('.v-qty').value
+                    });
+                });
+                formData.append('variants', JSON.stringify(variantsData));
+
+                let res = await fetch('/api/add-product-bundle', { method: 'POST', body: formData });
+                let data = await res.json();
+                if (data.success) { resetForm(); await loadProducts(); } else { alert('บันทึกล้มเหลว: ' + data.message); }
+            }
+        });
+
+        function startScanner(inputId, mode) {
+            activeScanInputId = inputId;
+            document.getElementById('scanner-container').style.display = 'block';
+            html5QrcodeScanner = new Html5Qrcode("interactive");
+            html5QrcodeScanner.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: { width: 250, height: 120 } },
+                async (decodedText) => {
+                    stopScanner();
+                    if (mode === 'add' && activeScanInputId) {
+                        document.getElementById(activeScanInputId).value = decodedText;
+                    } else if (mode === 'sell') {
+                        let product = allProducts.find(p => p.sku === decodedText.trim());
+                        if (product) { 
+                            await sellProductDirect(product.id, 1); 
+                        } else { 
+                            alert('ไม่พบรหัสบาร์โค้ดสีนี้ในคลังสินค้าครับ'); 
+                        }
+                    }
+                }
+            ).catch(err => alert("เปิดกล้องไม่ได้: " + err));
+        }
+
+        function stopScanner() {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.stop().then(() => {
+                    document.getElementById('scanner-container').style.display = 'none';
+                });
+            }
+        }
+
+        async function handleStock(id, action) {
+            let qty = prompt('ระบุจำนวนชิ้น:');
+            if (!qty || isNaN(qty)) return;
+            if (action === 'out') { 
+                await sellProductDirect(id, parseInt(qty)); 
+            } else {
+                await fetch('/api/stock-action', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, action, quantity: parseInt(qty) })
+                });
+                await loadProducts();
+            }
+        }
+
+        async function sellProductDirect(id, quantity) {
+            let res = await fetch('/api/stock-action', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, action: 'out', quantity })
+            });
+            let data = await res.json();
+            if (data.success) {
+                let p = allProducts.find(item => item.id == id);
+                let total = (p.price || 0) * quantity;
+                
+                document.getElementById('receiptContent').innerHTML = `
+                    <b>📆 วันที่:</b> ${new Date().toLocaleString('th-TH')}<br>
+                    <b>📦 รหัส SKU:</b> ${p.sku}<br>
+                    <b>🛍️ สินค้า:</b> ${p.name}<br>
+                    <b>🎨 สี/ตัวเลือกย่อย:</b> <span style="color:#6c5ce7; font-weight:bold;">${p.variant || 'ทั่วไป'}</span><br>
+                    <b>💵 ราคาชิ้นละ:</b> ${p.price || 0} บาท<br>
+                    <b>🔢 จำนวนที่ขาย:</b> ${quantity} ชิ้น<br>
+                    <div class="receipt-dash"></div>
+                    <b style="font-size: 19px; color: #10b981; display: block; text-align: right;">💰 ยอดรวมทั้งสิ้น: ${total} บาท</b>
+                `;
+                
+                document.getElementById('receiptModal').style.display = 'flex';
+                await loadProducts();
+            } else { 
+                alert('ตัดสต๊อกล้มเหลว: ' + data.message); 
+            }
+        }
+
+        function closeReceipt() { 
+            document.getElementById('receiptModal').style.display = 'none'; 
+        }
+
+        function filterProducts() {
+            let search = document.getElementById('searchInput').value.toLowerCase().trim();
+            if (event.key === 'Enter' && search !== "") {
+                let found = allProducts
