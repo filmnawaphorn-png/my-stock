@@ -55,7 +55,37 @@ app.post('/api/add-product-bundle', upload.single('image'), async (req, res) => 
     }
 });
 
-// 🔥 API ลบสินค้าเดี่ยว ๆ ออกจากระบบ
+// ✏️ API สำหรับบันทึกการแก้ไขข้อมูลสินค้าชิ้นนั้น ๆ
+app.post('/api/edit-product', upload.single('image'), async (req, res) => {
+    try {
+        const { id, sku, name, variant, category, price, qty } = req.body;
+        let updateData = {
+            sku: sku.trim(),
+            name: name.trim(),
+            variant: variant.trim(),
+            category: category.trim(),
+            price: parseFloat(price) || 0,
+            total_stock: parseInt(qty) || 0
+        };
+
+        if (req.file) {
+            const fileName = `${Date.now()}-${req.file.originalname}`;
+            const { data: uploadData, error: uploadError } = await supabase.storage
+                .from('products').upload(fileName, req.file.buffer, { contentType: req.file.mimetype, upsert: true });
+            if (!uploadError) {
+                updateData.image_url = supabase.storage.from('products').getPublicUrl(fileName).data.publicUrl;
+            }
+        }
+
+        const { error } = await supabase.from('products').update(updateData).eq('id', id);
+        if (error) throw error;
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// ลบสินค้าออก
 app.delete('/api/delete-product/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -67,6 +97,7 @@ app.delete('/api/delete-product/:id', async (req, res) => {
     }
 });
 
+// ปรับเพิ่มลดสต๊อก
 app.post('/api/stock-action', async (req, res) => {
     const { id, action, quantity } = req.body;
     const { data: product } = await supabase.from('products').select('*').eq('id', id).single();
