@@ -264,7 +264,7 @@
         }
 
         async function deleteProduct(id) {
-            if (confirm('คุณฟิล์มแน่ใจไหมครับว่าต้องการลบสินค้าชิ้นนี้ออกจากระบบอย่างถาวร?')) {
+            if (confirm('คุณแน่ใจไหมว่าต้องการลบสินค้าชิ้นนี้ออกจากระบบอย่างถาวร?')) {
                 let res = await fetch(`/api/delete-product/${id}`, { method: 'DELETE' });
                 let data = await res.json();
                 if (data.success) { await loadProducts(); } else { alert('ไม่สามารถลบได้: ' + data.message); }
